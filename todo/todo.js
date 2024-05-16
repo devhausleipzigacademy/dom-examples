@@ -10,11 +10,11 @@ function addTask() {
         alert("Empty item...");
         return;
     }
-    const newTask = document.createElement('li');
+    const newTask = document.createElement('tr');
     newTask.innerHTML = `
-    <input type="checkbox">
-    <span>${newItem}</span>
-    <button class="removeBtn">Remove</button>`;
+    <td><input type="checkbox" class="form-check-input mt-0"></td>
+    <td><span>${newItem}</span></td>
+    <td><button class="removeBtn btn btn-danger">Remove</button></td>`;
     todoList.appendChild(newTask);
     todoInput.value = '';
 }
@@ -29,17 +29,16 @@ todoInput.addEventListener('keydown', (event) => {
 
 
 // 3. create Event Listener for completing tasks
-
 todoList.addEventListener('click', (event) => {
     // check if target it the checkbox
     if (event.target.type === 'checkbox') {
         // get text element next to it
-        const todoText = event.target.nextElementSibling;
+        const todoText = event.target.parentElement.nextElementSibling;
         // toggle completed
         todoText.classList.toggle('completed');
     }
     // check if target is the button
     if (event.target.classList.contains("removeBtn")) {
-        event.target.parentElement.remove();
+        event.target.parentElement.parentElement.remove();
     }
 })

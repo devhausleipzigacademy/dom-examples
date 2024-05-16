@@ -3,6 +3,6 @@ ul {
 }
 
 .completed {
-    color: grey;
+    color: grey!important;
     text-decoration: line-through;
 }

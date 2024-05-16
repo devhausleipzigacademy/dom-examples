@@ -5,13 +5,18 @@ const todoList = document.getElementById('todoList'); // 1.3 todoList
 const deadline = document.getElementById('deadline');
 
 // create ID tracker
-let id = localStorage.getItem("id");
-
+let id = parseInt(localStorage.getItem("id"));
 if (id === null) {
     id = 0;
     localStorage.setItem("id", id);
 }
 
+// take care of todo Items
+let todoItems = JSON.parse(localStorage.getItem("todoItems"));
+if (todoItems === null) {
+    todoItems = {};
+    localStorage.setItem("todoItems", JSON.stringify(todoItems));
+}
 
 // 2. create Event Listener for adding tasks
 function addTask(event) {
@@ -30,8 +35,11 @@ function addTask(event) {
     <td><button class="removeBtn btn btn-danger">Remove</button></td>`;
     todoList.appendChild(newTask);
     todoInput.value = '';
+    // keep track of todo Items
+    todoItems[id] = {item: newItem, deadline: newDeadline};
     id++;
     localStorage.setItem("id", id);
+    localStorage.setItem("todoItems", JSON.stringify(todoItems));
 }
 
 todoForm.addEventListener('submit', addTask);

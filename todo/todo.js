@@ -1,54 +1,73 @@
 // 1. get elements by ID
-const todoInput = document.getElementById('todoInput'); // 1.1 todoInput
 const todoForm = document.getElementById('todoForm'); // 1.2 todoForm
 const todoList = document.getElementById('todoList'); // 1.3 todoList
-const deadline = document.getElementById('deadline');
 
-// create ID tracker
-let id = parseInt(localStorage.getItem("id"));
-if (id === null) {
-    id = 0;
-    localStorage.setItem("id", id);
+function displayTodo(id, item, deadline) {
+    const newTask = document.createElement('tr');
+    newTask.innerHTML = `
+    <td><input type="checkbox" class="form-check-input mt-0"></td>
+    <td><span>${item}</span></td>
+    <td><date>${deadline}</date></td>
+    <td><button class="removeBtn btn btn-danger" value="${id}">Remove</button></td>`;
+    todoList.appendChild(newTask);
 }
 
-// take care of todo Items
-let todoItems = JSON.parse(localStorage.getItem("todoItems"));
-if (todoItems === null) {
-    todoItems = {};
-    localStorage.setItem("todoItems", JSON.stringify(todoItems));
+function removeTodo(id) {
+    const todos = JSON.parse(localStorage.getItem("todos"))
+    const filteredTodos = todos.filter((todo) => todo.id !== id)
+    localStorage.setItem("todos", JSON.stringify(filteredTodos))    
+}
+
+const todos = JSON.parse(localStorage.getItem("todos"))
+// Optional chaining
+if(todos?.length) {
+    for (const todo of todos) {
+        displayTodo(todo.id, todo.item, todo.deadline)
+     }
+}
+
+// When we submit, get localStorage -> update it -> write back
+function saveTask(item, deadline) {
+    // read todos from localStorage
+    const todosFromLS = localStorage.getItem("todos")
+    let todos = JSON.parse(todosFromLS)
+    console.log("before adding", todos)
+    // check if we have todos already saved
+    if(!todos) {
+        todos = []
+    }
+    // update todos
+    const lastItem = todos[todos.length - 1]
+    console.log("lastItem", lastItem)
+    let id = !lastItem ? 1 : lastItem.id + 1
+    console.log("id", id)
+
+    todos.push({id, item, deadline})
+    console.log("after adding", todos)
+    // write them back to localStorage
+    localStorage.setItem("todos", JSON.stringify(todos))
+    return id
 }
 
 // 2. create Event Listener for adding tasks
 function addTask(event) {
     event.preventDefault();
-    const newItem = todoInput.value.trim();
-    const newDeadline = deadline.value;
-    if (newItem === "" || newDeadline === "") {
+
+    const form = event.target
+    const formData = new FormData(form)
+    const {item, deadline} = Object.fromEntries(formData) 
+    
+    if (item === "" || deadline === "") {
         alert("Incomplete form...");
         return;
     }
-    const newTask = document.createElement('tr');
-    newTask.innerHTML = `
-    <td><input type="checkbox" class="form-check-input mt-0"></td>
-    <td><span>${newItem}</span></td>
-    <td><date>${newDeadline}</date></td>
-    <td><button class="removeBtn btn btn-danger">Remove</button></td>`;
-    todoList.appendChild(newTask);
-    todoInput.value = '';
+    const id = saveTask(item, deadline)
+    displayTodo(id, item, deadline)
+    form.reset()
     // keep track of todo Items
-    todoItems[id] = {item: newItem, deadline: newDeadline};
-    id++;
-    localStorage.setItem("id", id);
-    localStorage.setItem("todoItems", JSON.stringify(todoItems));
 }
 
 todoForm.addEventListener('submit', addTask);
-
-todoInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-        addTask();
-    }
-})
 
 
 // 3. create Event Listener for completing tasks
@@ -62,6 +81,8 @@ todoList.addEventListener('click', (event) => {
     }
     // check if target is the button
     if (event.target.classList.contains("removeBtn")) {
+        const id = parseInt(event.target.value)
+        removeTodo(id)
         event.target.parentElement.parentElement.remove();
     }
 })
